@@ -1,5 +1,6 @@
 package kanbanrest.service;
 
+import kanbanrest.Coluna;
 import org.apache.commons.lang3.StringUtils;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -13,20 +14,18 @@ import kanbanrest.request.ColunaRequest;
 @ApplicationScoped
 public class ColunaService {
 
-  public ColunaModel getColunaPorId(long id) {
-    return (ColunaModel) ColunaModel.findByIdOptional(id).orElseThrow(() -> new NenhumRegistroException("Nenhuma coluna encontrada para o id: " + id));
-  }
-  public ColunaModel getColunaPorId(long idKanban, long id) {
-    return ColunaModel.findById(idKanban, id);
-  }
+  private static final org.jboss.logging.Logger LOG = org.jboss.logging.Logger.getLogger(ColunaService.class);
   
   @Transactional
   public void insereColuna(long idKanban, ColunaRequest colunaRequest) {
+    LOG.info("insereColuna: Buscando referencia do kanban: " + idKanban);
     KanbanModel kanban = KanbanModel.findById(idKanban);
-    ColunaModel coluna = colunaRequest.toModel();
-    
+    LOG.info("insereColuna: Validando objeto request");
     validaRequestInsercao(colunaRequest);
-    
+    LOG.info("insereColuna: Transformando objeto request em model");
+    ColunaModel coluna = colunaRequest.toModel();
+
+    LOG.info("insereColuna: Inserindo coluna no kanban");
     kanban.getColunas().add(coluna);
     kanban.persist();
   }
@@ -42,10 +41,16 @@ public class ColunaService {
   
   @Transactional
   public void alteraColuna(long idKanban, long id, ColunaRequest colunaRequest) {
-    ColunaModel coluna = getColunaPorId(idKanban, id);
+    LOG.info("alteraColuna: Buscando coluna. kanban: " + idKanban + " coluna: " + id);
+    ColunaModel coluna = ColunaModel.findById(idKanban, id);
+    LOG.info("alteraColuna: Validando objeto request");
     validaRequestInsercao(colunaRequest);
+    LOG.info("alteraColuna: Alterando stage da coluna para: " + colunaRequest.getColuna());
     coluna.setStage(colunaRequest.getColuna());
+    LOG.info("alteraColuna: Alterando nome da coluna para: " + colunaRequest.getNome());
     coluna.setNome(colunaRequest.getNome());
+
+    LOG.info("alteraColuna: Salvando coluna no banco");
     coluna.persist();
   }
   

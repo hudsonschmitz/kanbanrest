@@ -22,19 +22,22 @@ import kanbanrest.service.ColunaService;
 @Consumes(MediaType.APPLICATION_JSON)
 public class Coluna {
 
+
+  private static final org.jboss.logging.Logger LOG = org.jboss.logging.Logger.getLogger(Coluna.class);
   @Inject
   ColunaService colunaService;
 
   @GET
   @Path("{idKanban}/coluna/{id}")
-  public ColunaModel getColuna(@PathParam(value = "idKanban") long idKanban, @PathParam(value = "id") long id) {
-    Logger.getAnonymousLogger().warning("Chegou aqui. :" + idKanban + " " + id);
+  public ColunaModel buscaColunaPorId(@PathParam(value = "idKanban") long idKanban, @PathParam(value = "id") long id) {
+    LOG.info("buscaColunaPorId: Buscando coluna. kanban: " + idKanban + " coluna: " + id);
     return ColunaModel.findById(idKanban, id);
   }
 
   @POST
   @Path("{idKanban}/coluna/")
   public Response insereColuna(@PathParam(value = "idKanban") long idKanban, ColunaRequest colunaRequest) {
+    LOG.info("insereColuna:     invocando service");
     colunaService.insereColuna(idKanban, colunaRequest);
     return Response.status(201).build();
   }
@@ -42,6 +45,7 @@ public class Coluna {
   @PATCH
   @Path("{idKanban}/coluna/{id}")
   public Response alteraColuna(@PathParam(value = "idKanban") long idKanban, @PathParam(value = "id") long id, ColunaRequest colunaRequest) {
+    LOG.info("alteraColuna:     invocando service");
     colunaService.alteraColuna(idKanban, id, colunaRequest);
     return Response.status(201).build();
   }
