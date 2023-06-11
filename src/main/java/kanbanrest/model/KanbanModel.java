@@ -1,38 +1,39 @@
 package kanbanrest.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import kanbanrest.exception.NenhumRegistroException;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
+import java.util.logging.Logger;
+
+
+@EqualsAndHashCode(callSuper = true)
 @Entity(name = "Kanban")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class KanbanModel extends PanacheEntityBase {
+
+  private static final Logger LOG = Logger.getLogger(KanbanModel.class.getName());
   
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private long id;
-  
-  @OneToMany(mappedBy = "kanban", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  private List<ColunaModel> colunas = new ArrayList<>();
-  
-  public long getId() {
-    return id;
+
+  private String nome;
+  private Boolean ativo;
+
+  public static KanbanModel buscarPorId(long id) {
+    LOG.info("-------------------------------------------------");
+    LOG.info(String.valueOf(id));
+   return (KanbanModel) KanbanModel.findByIdOptional(id).orElseThrow(() -> new NenhumRegistroException("Nenhum kanban encontrado com o id: " + id));
   }
-  public void setId(long id) {
-    this.id = id;
-  }
-  public List<ColunaModel> getColunas() {
-    return colunas;
-  }
-  public void setColunas(List<ColunaModel> colunas) {
-    this.colunas = colunas;
-  }
-  
+
 }

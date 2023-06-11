@@ -1,20 +1,20 @@
 package kanbanrest.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import kanbanrest.exception.CampoObrigatorioException;
-import kanbanrest.exception.NenhumRegistroException;
+import jakarta.persistence.*;
+import kanbanrest.exception.CampoInvalidoException;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.List;
+
 @Entity(name = "Item")
+@Data
+@NoArgsConstructor
+@NamedQuery(name = "Item.findByColunaId", query = "SELECT i FROM Item i WHERE i.coluna = :coluna")
+@EqualsAndHashCode(callSuper = true)
 public class ItemModel extends PanacheEntityBase {
 
   @Id
@@ -23,55 +23,26 @@ public class ItemModel extends PanacheEntityBase {
   
   private String descricao;
   private List<String> hashTags;
-  
+
   @ManyToOne
   @JoinColumn(name = "coluna_id")
   private ColunaModel coluna;
 
-  public static List<ItemModel> findAll(long idKanban, long idColuna) {
-    ColunaModel colunaModel = ColunaModel.findById(idKanban, idColuna);
-
-    return colunaModel.getItens();
-  }
-
-  public static ItemModel buscaItemPorId(long idKanban, long idColuna, long id) {
-    List<ItemModel> listaItens = ItemModel.findAll(idKanban, idColuna);
-    return listaItens.stream().filter((item) -> item.id == id)
-                              .findFirst()
-                              .orElseThrow(
-                                      () -> new NenhumRegistroException("Item não encontrado.")
-                              );
-  }
-
-  public long getId() {
-    return id;
-  }
-  public void setId(long id) {
-    this.id = id;
-  }
-  public String getDescricao() {
-    return this.descricao;
-  }
-  public void setDescricao(String descricao) {
+  public ItemModel(String descricao, List<String> hashTags, ColunaModel coluna) {
     this.descricao = descricao;
-  }
-  public List<String> getHashTags() {
-    return this.hashTags;
-  }
-  public void setHashTags(List<String> hashTags) {
     this.hashTags = hashTags;
-  }
-
-  public void validate() {
-    if(StringUtils.isBlank(this.descricao)) {
-      throw new CampoObrigatorioException("Campo descrição do item é obrigatório.");
-    }
-  }
-  public void setColuna(ColunaModel coluna) {
     this.coluna = coluna;
   }
 
-  public ColunaModel getColuna() {
-    return coluna;
+  public static List<ItemModel> buscaItensColuna(ColunaModel colunaModel) {
+    TypedQuery<ItemModel> query = ItemModel.getEntityManager().createNamedQuery("Item.findByColunaId", ItemModel.class);
+    query.setParameter("coluna", colunaModel);
+    return query.getResultList();
+  }
+  public static ItemModel buscaItemPorId(long id) {
+    return ItemModel.findById(id);
+  }
+  public void validate() {
+    if(StringUtils.isBlank(this.descricao)) throw new CampoInvalidoException("Campo descrição do item é obrigatório.");
   }
 }

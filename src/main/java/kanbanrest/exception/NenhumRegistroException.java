@@ -5,7 +5,7 @@ public class NenhumRegistroException extends RuntimeException  {
   private static final long serialVersionUID = 4056308970507774104L;
   private String message;
   
-  NenhumRegistroException() {
+  private NenhumRegistroException() {
     
   }
   
@@ -16,9 +16,6 @@ public class NenhumRegistroException extends RuntimeException  {
   
   public String getMessage() {
     return message;
-  }
-  public void setMessage(String message) {
-    this.message = message;
   }
 
 }

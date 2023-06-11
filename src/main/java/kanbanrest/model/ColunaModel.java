@@ -1,22 +1,24 @@
 package kanbanrest.model;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
+import kanbanrest.exception.CampoInvalidoException;
 import kanbanrest.exception.NenhumRegistroException;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity(name = "Coluna")
+@Data
+@NoArgsConstructor
+@NamedQueries(
+  {
+    @NamedQuery(name = "Coluna.findByKanbanId", query = "SELECT c FROM Coluna c WHERE c.kanban = :kanban"),
+    @NamedQuery(name = "Coluna.findByIdAndKanbanId", query = "SELECT c FROM Coluna c WHERE c.id = :idColuna AND c.kanban = :kanban")
+  }
+)
+
 public class ColunaModel extends PanacheEntityBase {
   
   @Id
@@ -30,45 +32,18 @@ public class ColunaModel extends PanacheEntityBase {
   @ManyToOne
   @JoinColumn(name = "kanban_id")
   private KanbanModel kanban;
-  
-  @OneToMany(mappedBy = "coluna", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-  private List<ItemModel> itens = new ArrayList<>();
-  
-  public static ColunaModel findById(long idKanban, long id) {
-    KanbanModel kanban = KanbanModel.findById(idKanban);
-    return kanban.getColunas().stream().filter((coluna) -> coluna.getId() == id).findFirst().orElseThrow(() -> new NenhumRegistroException("Nenhuma coluna encontrada para esse id."));
-  }
 
-  public long getId() {
-    return id;
-  }
-
-  public void setId(long id) {
-    this.id = id;
-  }
-
-  public int getStage() {
-    return stage;
-  }
-
-  public void setStage(int stage) {
+  public ColunaModel(int stage, String nome, KanbanModel kanbanModel) {
     this.stage = stage;
-  }
-
-  public String getNome() {
-    return nome;
-  }
-
-  public void setNome(String nome) {
     this.nome = nome;
+    this.kanban = kanbanModel;
   }
 
-  public List<ItemModel> getItens() {
-    return itens;
-  }
-
-  public void setItens(List<ItemModel> itens) {
-    this.itens = itens;
+  public static ColunaModel buscarPorId(Long id) {
+    if(id == null) {
+      throw new CampoInvalidoException("ID da coluna não pode ser nulo.");
+    }
+    return (ColunaModel) ColunaModel.findByIdOptional(id).orElseThrow(() -> new NenhumRegistroException("Nenhuma coluna encontrada com id: " + id));
   }
 
 }

@@ -1,16 +1,12 @@
 package kanbanrest;
 
-import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
-import jakarta.transaction.Transactional;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import kanbanrest.model.KanbanModel;
+import kanbanrest.request.KanbanRequest;
+import kanbanrest.response.KanbanResponse;
+import kanbanrest.service.KanbanService;
 import org.jboss.logging.Logger;
 
 @Path("/kanban")
@@ -18,21 +14,21 @@ import org.jboss.logging.Logger;
 @Consumes(MediaType.APPLICATION_JSON)
 public class Kanban {
 
+  @Inject
+  KanbanService kanbanService;
+
   private static final Logger LOG = Logger.getLogger(Kanban.class);
   @GET
   @Path("/{id}")
-  public KanbanModel buscarPorId(@PathParam(value = "id") long id) {
+  public KanbanResponse buscarPorId(@PathParam(value = "id") Long id) {
     LOG.info("buscarPorId: Buscando kanban por id: " + id);
-    return KanbanModel.findById(id);
+    return kanbanService.buscarKanbanPorId(id);
   }
   
   @POST
-  @Transactional
-  public Response criarKanban() {
-    KanbanModel kanban = new KanbanModel();
-    LOG.info("criarKanban: Criando novo kanban: ");
-    kanban.persist();
-    return Response.status(201).build();
+  public Response criarKanban(KanbanRequest kanbanRequest) {
+    KanbanResponse kanbanResponse = kanbanService.criarKanban(kanbanRequest);
+    return Response.status(201).entity(kanbanResponse).build();
   }
   
 }
