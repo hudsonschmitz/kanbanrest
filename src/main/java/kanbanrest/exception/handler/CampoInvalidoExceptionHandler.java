@@ -13,7 +13,6 @@ public class CampoInvalidoExceptionHandler implements ExceptionMapper<CampoInval
 
   @Override
   public Response toResponse(CampoInvalidoException exception) {
-    LOG.error("toResponse: Campo nome da coluna é obrigatório.", exception);
     return Response.status(400).entity(new ResponseError(exception.getMessage())).build();
   }
 

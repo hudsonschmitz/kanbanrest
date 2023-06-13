@@ -12,7 +12,7 @@ public class ColunaRequest implements Serializable {
   private int stage;
   private String nome;
   
-  private ColunaRequest(){}
+  public ColunaRequest(){}
 
   public ColunaRequest(int stage, String nome) {
     super();

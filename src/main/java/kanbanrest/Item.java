@@ -8,6 +8,7 @@ import kanbanrest.model.ItemModel;
 import kanbanrest.request.ItemRequest;
 import kanbanrest.service.ItemService;
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.reactive.RestQuery;
 
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class Item {
 
   @PUT
   @Path("/{id}")
-  public Response moveItem(@PathParam(value = "id") long id, @QueryParam(value = "idColunaDestino") long idColunaDestino) {
+  public Response moveItem(@PathParam(value = "id") long id, @RestQuery(value = "idColunaDestino") Long idColunaDestino) {
     itemService.moveItem(id, idColunaDestino);
     return Response.status(201).build();
   }
